@@ -3,8 +3,7 @@ from rest_framework import permissions
 
 class IsOwner(permissions.BasePermission):
     """
-    Object-level permission to only allow owners of an object to view or edit it.
-    Provides defense-in-depth row-level security.
+    Object-level permission to ensure only owners of an object can view, mutate, or delete it.
     """
 
     def has_object_permission(self, request, view, obj):

@@ -78,7 +78,7 @@ class AttemptTests(APITestCase):
 
     def test_user_a_cannot_read_user_b_attempts(self):
         """
-        Critical Row-Level Security:
+        Critical Owner Isolation:
         User A cannot see User B's attempts in list and receives 404 when querying User B's attempt ID directly.
         """
         # User B creates an attempt

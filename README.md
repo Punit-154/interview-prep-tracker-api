@@ -2,43 +2,42 @@
 
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/)
 [![Django 5.2](https://img.shields.io/badge/Django-5.2-green.svg)](https://www.djangoproject.com/)
-[![Django REST Framework](https://img.shields.io/badge/DRF-3.15-red.svg)](https://www.django-rest-framework.org/)
-[![OpenAPI / Swagger](https://img.shields.io/badge/Docs-Swagger%20%2F%20ReDoc-brightgreen.svg)](/api/docs/)
-[![Tests](https://img.shields.io/badge/Tests-19%20Passing-success.svg)](/tracker/tests/)
+[![Django REST Framework](https://img.shields.io/badge/DRF-3.18-red.svg)](https://www.django-rest-framework.org/)
+[![Tests](https://img.shields.io/badge/Tests-19%20Passing-success.svg)](tracker/tests/)
 
-A robust, production-ready backend REST API built with **Django** and **Django REST Framework (DRF)** to track technical interview preparation, problem attempts, time metrics, and performance analytics.
+A backend REST API built with **Django** and **Django REST Framework (DRF)** to track coding interview preparation, problem attempts, time metrics, and performance analytics.
 
-Custom-engineered with JWT authentication, row-level data isolation, database-level query optimization, and OpenAPI 3.0 interactive documentation.
+Features JWT authentication, owner-scoped querysets, problem filtering, search, pagination, and OpenAPI 3.0 documentation.
 
 ---
 
 ## Key Features
 
 - **JWT Authentication (`djangorestframework-simplejwt`)**:
-  - Secure registration, login, and token refresh endpoints.
+  - Registration, login, and token refresh endpoints.
   - Stateless Bearer token verification.
 - **Data Models & Constraints**:
   - `Problem`: Categorized by topic and difficulty, storing external problem URLs.
   - `Attempt`: Tracks solve status (`solved`, `attempted`, `failed`, `reviewing`), duration in minutes, personal notes, and dates.
   - Database-level `UniqueConstraint(fields=['user', 'problem'])` preventing duplicate attempt records per candidate.
-- **Row-Level Security & Defense-in-Depth Permissions**:
+- **Owner-Scoped QuerySets & Object Permissions**:
   - `get_queryset()` strictly filters records scoped to `request.user`.
-  - Object-level `IsOwner` permission prevents cross-tenant access. User A receives `404 Not Found` when trying to view, update, or delete User B's attempts.
-- **Advanced Querying**:
+  - Object-level `IsOwner` permission ensures User A receives `404 Not Found` when trying to view, update, or delete User B's attempts.
+- **Filtering, Search & Pagination**:
   - Topic and difficulty filtering via `django-filter` (`?topic=arrays&difficulty=easy`).
   - Search by problem title and attempt notes (`?search=tree`).
   - Configurable page-based pagination (`?page=2&page_size=10`).
-- **High-Performance Aggregated Analytics**:
-  - Dedicated `/api/attempts/stats/` endpoint computing solved count per topic and difficulty in a single SQL query using Django ORM `annotate()`, `Count()`, and `Sum()`.
-- **Database & Deployment Ready**:
-  - Seamless zero-config SQLite locally, with instant switch to **PostgreSQL** in production via `dj-database-url`.
-  - Static files served efficiently via **WhiteNoise**.
-  - Ready for 1-click deployment to **Render** (`render.yaml`, `build.sh`, `Procfile`).
+- **Aggregated Analytics**:
+  - Dedicated `/api/attempts/stats/` endpoint computed with ORM aggregation (`annotate`, `Count`, `Sum`) to report solved counts per topic, difficulty breakdowns, and total practice time.
+- **Database & Deployment**:
+  - SQLite for local development, with support for PostgreSQL via `dj-database-url`.
+  - Static files served via WhiteNoise.
+  - Deployment configuration for Render (`render.yaml`, `build.sh`, `Procfile`).
 - **Interactive Documentation**:
   - Swagger UI: `/api/docs/`
   - ReDoc: `/api/redoc/`
   - Raw OpenAPI 3 schema: `/api/schema/`
-- **Comprehensive Test Suite**:
+- **Automated Test Suite**:
   - 19 automated tests covering authentication, CRUD, permissions, unique constraints, and analytics with 100% pass rate.
 
 ---
@@ -99,7 +98,7 @@ erDiagram
 ### Practice Attempts (`/api/attempts/`) — Owner Scoped
 | Method | Endpoint | Description | Auth Required |
 |---|---|---|---|
-| `GET` | `/api/attempts/` | List user's attempts (filtered to authenticated owner) | **Yes (Bearer)** |
+| `GET` | `/api/attempts/` | List user's attempts (scoped to authenticated owner) | **Yes (Bearer)** |
 | `POST` | `/api/attempts/` | Record new attempt (user automatically attached) | **Yes (Bearer)** |
 | `GET` | `/api/attempts/{id}/` | Retrieve attempt detail (only if owner) | **Yes (Bearer)** |
 | `PUT` | `/api/attempts/{id}/` | Replace attempt record (only if owner) | **Yes (Bearer)** |
@@ -107,7 +106,7 @@ erDiagram
 | `DELETE` | `/api/attempts/{id}/` | Delete attempt record (only if owner) | **Yes (Bearer)** |
 | `GET` | `/api/attempts/stats/` | Aggregated analytics: solved per topic/difficulty & total time | **Yes (Bearer)** |
 
-### Interactive Documentation & Health
+### Documentation & Health
 | Endpoint | Description |
 |---|---|
 | `/` | Health check & API root discovery |
@@ -125,14 +124,14 @@ erDiagram
 
 ### 1. Clone & Set Up Virtual Environment
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/Punit-154/interview-prep-tracker-api.git
 cd interview-prep-tracker-api
 
 # Create and activate virtual environment
 python -m venv .venv
 
 # On Windows PowerShell:
-.venv\Scripts\Activate.ps1
+.\.venv\Scripts\Activate.ps1
 
 # On macOS/Linux:
 source .venv/bin/activate
@@ -176,7 +175,7 @@ Or using `pytest`:
 pytest -v
 ```
 
-All 19 tests pass, covering:
+All 19 tests cover:
 - Registration, validation, and JWT token issuance
 - Read-only protection on problems (405 Method Not Allowed)
 - Filtering and search accuracy
@@ -186,7 +185,7 @@ All 19 tests pass, covering:
 
 ---
 
-## Production Deployment (Render)
+## Deployment (Render)
 
 This repository includes a native **Render Blueprint** (`render.yaml`):
 
@@ -196,12 +195,4 @@ This repository includes a native **Render Blueprint** (`render.yaml`):
 4. Render will automatically:
    - Provision a managed **PostgreSQL** database.
    - Run `./build.sh` (installs requirements, collects static files, runs migrations, and seeds problems).
-   - Start the production **Gunicorn** WSGI web service.
-
----
-
-## Resume Bullet Points
-
-> **Interview Prep Tracker API** | Django, DRF, PostgreSQL, JWT, pytest
-> - Engineered a production-ready REST API using Django REST Framework and PostgreSQL to manage interview prep tracking with JWT authentication and row-level permissions.
-> - Implemented aggregated analytics endpoints using Django ORM `annotate()` and `Count()` for topic/difficulty breakdown, and built an automated test suite of 19 tests covering permissions and security isolation.
+   - Start the **Gunicorn** WSGI web service.

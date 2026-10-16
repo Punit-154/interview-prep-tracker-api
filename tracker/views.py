@@ -45,7 +45,7 @@ class ProblemViewSet(viewsets.ReadOnlyModelViewSet):
 class AttemptViewSet(viewsets.ModelViewSet):
     """
     Full CRUD ViewSet for user practice attempts.
-    Guarantees row-level isolation: users can strictly view, create, edit, and delete their own attempts.
+    Ensures users can strictly view, create, edit, and delete their own attempts.
     """
     serializer_class = AttemptSerializer
     permission_classes = (permissions.IsAuthenticated, IsOwner)
@@ -56,7 +56,7 @@ class AttemptViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """
-        Enforce Row-Level Security: Only return attempts belonging to the authenticated user.
+        Owner-scoped queryset: Only return attempts belonging to the authenticated user.
         Uses select_related to prevent N+1 query overhead for related problems and users.
         """
         if getattr(self, 'swagger_fake_view', False) or not self.request.user.is_authenticated:
