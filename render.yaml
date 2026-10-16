@@ -1,0 +1,24 @@
+databases:
+  - name: interview_tracker_db
+    databaseName: tracker_db
+    user: tracker_user
+    plan: free
+
+services:
+  - type: web
+    name: interview-prep-tracker-api
+    runtime: python
+    plan: free
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn interview_tracker.wsgi:application"
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: interview_tracker_db
+          property: connectionString
