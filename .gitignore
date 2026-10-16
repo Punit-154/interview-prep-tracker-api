@@ -48,3 +48,7 @@ htmlcov/
 *.swp
 .DS_Store
 Thumbs.db
+
+# Private local notes & study guides
+STUDY_GUIDE.md
+DJANGO_ZERO_TO_HERO.md
